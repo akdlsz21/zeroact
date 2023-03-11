@@ -1,9 +1,4 @@
-import {
-	IElement,
-	IProp,
-	HTMLElementReadOnlyProperties,
-	NonHTMLReadOnlyPropertyKeys,
-} from '../types/zeroactTypes';
+import { IElement, IProp } from '../types/zeroactTypes';
 
 const TEXT_ELEMENT = 'TEXT_ELEMENT';
 
@@ -51,13 +46,10 @@ function render(element: IElement, container: HTMLElement | Text) {
 			// Static method Object.defineProperty does sets a new property to the dom,
 			// but when appendChild to the container, it does not get reflected. Do not know why.
 			dom.nodeValue = element.props[key];
-			continue;
 		}
-		const elemPropKey = key as NonHTMLReadOnlyPropertyKeys;
 		Object.defineProperty(dom, key, {
 			value: element.props[key],
-			enumerable: true,
-			writable: false,
+			writable: true,
 		});
 	}
 
@@ -77,7 +69,7 @@ const Zeroact = {
 
 /** @jsx Zeroact.createElement */
 const element = (
-	<div style={{ marginLeft: '100px' }}>
+	<div>
 		<button id="foo">
 			what
 			<a>bar</a>

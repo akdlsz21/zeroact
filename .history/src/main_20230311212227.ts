@@ -1,9 +1,4 @@
-import {
-	IElement,
-	IProp,
-	HTMLElementReadOnlyProperties,
-	NonHTMLReadOnlyPropertyKeys,
-} from '../types/zeroactTypes';
+import { IElement, IProp } from '../types/zeroactTypes';
 
 const TEXT_ELEMENT = 'TEXT_ELEMENT';
 
@@ -53,12 +48,13 @@ function render(element: IElement, container: HTMLElement | Text) {
 			dom.nodeValue = element.props[key];
 			continue;
 		}
-		const elemPropKey = key as NonHTMLReadOnlyPropertyKeys;
-		Object.defineProperty(dom, key, {
-			value: element.props[key],
-			enumerable: true,
-			writable: false,
-		});
+		const val: keyof HTMLElement = element.props[key];
+		dom[key] = val;
+		// Object.defineProperty(dom, key, {
+		// 	value: element.props[key],
+		// 	enumerable: true,
+		// 	writable: false,
+		// });
 	}
 
 	const { children } = element.props;

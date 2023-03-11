@@ -1,9 +1,4 @@
-import {
-	IElement,
-	IProp,
-	HTMLElementReadOnlyProperties,
-	NonHTMLReadOnlyPropertyKeys,
-} from '../types/zeroactTypes';
+import { IElement, IProp } from '../types/zeroactTypes';
 
 const TEXT_ELEMENT = 'TEXT_ELEMENT';
 
@@ -16,17 +11,19 @@ export function createElement(
 		type,
 		props: {
 			...props,
-			// children array could be primitive, so we need to filter it, and make it an array of Element type objects.
+			// children array could be primitive, so we need to filter it, and make it an array of objects
 			children: children.map((child) => {
 				if (typeof child === 'object') return child;
 				const textElement = createTextElement(child);
-				return typeof child === 'object' ? child : textElement;
+				console.log(textElement);
+				return typeof child === 'object' ? child : createTextElement(child);
 			}),
 		},
 	};
 }
 
 function createTextElement(text: string | number | boolean | null | undefined) {
+	console.log(text);
 	return {
 		type: TEXT_ELEMENT,
 		props: {
@@ -37,33 +34,37 @@ function createTextElement(text: string | number | boolean | null | undefined) {
 }
 
 function render(element: IElement, container: HTMLElement | Text) {
+	console.log(element);
+	console.log(container);
 	if (!container) alert('container is not defined');
 	if (!element) alert('element is not defined');
-
 	let dom =
 		element.type === TEXT_ELEMENT
 			? document.createTextNode('')
 			: document.createElement(element.type);
 
-	for (const key in element.props) {
+	// TODO: Need to find a way to set props to the dom object.
+	const { props } = element;
+	if (!props) return;
+	// only for props
+	for (const key of Object.keys(props)) {
 		if (key === 'children') continue;
-		if (key === 'nodeValue' && dom.nodeValue === '') {
-			// Static method Object.defineProperty does sets a new property to the dom,
-			// but when appendChild to the container, it does not get reflected. Do not know why.
-			dom.nodeValue = element.props[key];
-			continue;
-		}
-		const elemPropKey = key as NonHTMLReadOnlyPropertyKeys;
-		Object.defineProperty(dom, key, {
-			value: element.props[key],
-			enumerable: true,
-			writable: false,
-		});
-	}
+		/**
+		 * props[onclick] = () => {}
+		 * becomes
+		 * dom[onclick] = () => {}
+		 */
 
-	const { children } = element.props;
+		// dom = { ...dom, [key]: props[key] };
+		// dom[key] = element.props[key];
+		Object.defineProperty(dom, key, { value: props[key] });
+	}
+	// only for children, recursively render to the first ancestor and append
+	// BUG: element2.props.children is not iterable.
+	const { children } = props;
 	if (!children) return;
 	for (const child of children) {
+		// rendering child recursively
 		render(child, dom);
 	}
 
@@ -77,15 +78,10 @@ const Zeroact = {
 
 /** @jsx Zeroact.createElement */
 const element = (
-	<div style={{ marginLeft: '100px' }}>
-		<button id="foo">
-			what
-			<a>bar</a>
-			<b />
-		</button>
-		<div>
-			<h1>hello</h1>
-		</div>
+	<div id="foo">
+		text
+		{/* <a>bar</a>
+		<b /> */}
 	</div>
 );
 
