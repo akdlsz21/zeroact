@@ -36,7 +36,7 @@ function createTextElement(text: string | number | boolean | null | undefined) {
 	};
 }
 
-function render(element: IElement, container: HTMLElement | Text) {
+function render(element: any, container: any) {
 	if (!container) alert('container is not defined');
 	if (!element) alert('element is not defined');
 
@@ -48,20 +48,12 @@ function render(element: IElement, container: HTMLElement | Text) {
 	for (const key in element.props) {
 		if (key === 'children') continue;
 		if (key === 'nodeValue' && dom.nodeValue === '') {
-			// Static method Object.defineProperty does sets a new property to the dom,
-			// but when appendChild to the container, it does not get reflected. Do not know why.
 			dom.nodeValue = element.props[key];
 			continue;
 		}
-		if (dom instanceof HTMLElement) {
-			const elemPropKey = key as NonHTMLReadOnlyPropertyKeys;
-			dom[elemPropKey] = element.props[key];
-		}
-		// Object.defineProperty(dom, key, {
-		// 	value: element.props[key],
-		// 	enumerable: true,
-		// 	writable: false,
-		// });
+		const elemPropKey = key;
+		dom[elemPropKey] = element.props[key];
+		console.log(dom.style);
 	}
 
 	const { children } = element.props;
