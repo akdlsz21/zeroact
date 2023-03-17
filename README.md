@@ -24,9 +24,5 @@ the nextUnitOfWork.
 # Example
 
 An example usage of the Zeroact library is provided at the end of the file.
+![image](https://user-images.githubusercontent.com/81629070/225825432-73e6d930-22b5-42d2-b307-832c26d30ba5.png)
 
-const element = ( <div style={{ marginLeft: '100px' }}> <button id="foo"> what
-<a>bar</a> <b /> </button> <div> <h1>hello</h1> </div> </div> );
-
-const container = document.getElementById('root'); if (container)
-Zeroact.render(element, container);
