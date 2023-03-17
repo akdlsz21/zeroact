@@ -4,26 +4,14 @@ import {
 	HTMLElementReadOnlyProperties,
 	NonHTMLReadOnlyPropertyKeys,
 } from '../types/zeroactTypes';
-import React from 'react';
 
 const TEXT_ELEMENT = 'TEXT_ELEMENT';
 
 export function createElement(
 	type: string,
 	props: IProp,
-	...children: Array<IElement>
+	...children: Array<IElement | string>
 ): IElement {
-	/**
-	 * type: div
-	 * props: null
-	 * children: null
-	 */
-
-	/**
-	 * {type: div
-	 * 	props: {}
-	 * }
-	 */
 	return {
 		type,
 		props: {
@@ -67,7 +55,7 @@ function render(element: IElement, container: HTMLElement | Text) {
 		}
 		if (dom instanceof HTMLElement) {
 			const elemPropKey = key as NonHTMLReadOnlyPropertyKeys;
-			// dom[elemPropKey] = element.props[key];
+			dom[elemPropKey] = element.props[key];
 		}
 		// Object.defineProperty(dom, key, {
 		// 	value: element.props[key],
