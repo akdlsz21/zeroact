@@ -1,89 +1,5 @@
-import {
-	IElement,
-	IProp,
-	HTMLElementReadOnlyProperties,
-	NonHTMLReadOnlyPropertyKeys,
-} from '../types/zeroactTypes';
 import React from 'react';
-
-const TEXT_ELEMENT = 'TEXT_ELEMENT';
-
-export function createElement(
-	type: string,
-	props: IProp,
-	...children: Array<IElement>
-): IElement {
-	/**
-	 * type: div
-	 * props: null
-	 * children: null
-	 */
-
-	/**
-	 * {type: div
-	 * 	props: {}
-	 * }
-	 */
-	return {
-		type,
-		props: {
-			...props,
-			// children array could be primitive, so we need to filter it, and make it an array of Element type objects.
-			children: children.map((child) => {
-				if (typeof child === 'object') return child;
-				const textElement = createTextElement(child);
-				return typeof child === 'object' ? child : textElement;
-			}),
-		},
-	};
-}
-
-function createTextElement(text: string | number | boolean | null | undefined) {
-	return {
-		type: TEXT_ELEMENT,
-		props: {
-			nodeValue: text,
-			children: [],
-		},
-	};
-}
-
-function render(element: IElement, container: HTMLElement | Text) {
-	if (!container) alert('container is not defined');
-	if (!element) alert('element is not defined');
-
-	let dom =
-		element.type === TEXT_ELEMENT
-			? document.createTextNode('')
-			: document.createElement(element.type);
-
-	for (const key in element.props) {
-		if (key === 'children') continue;
-		if (key === 'nodeValue' && dom.nodeValue === '') {
-			// Static method Object.defineProperty does sets a new property to the dom,
-			// but when appendChild to the container, it does not get reflected. Do not know why.
-			dom.nodeValue = element.props[key];
-			continue;
-		}
-		if (dom instanceof HTMLElement) {
-			const elemPropKey = key as NonHTMLReadOnlyPropertyKeys;
-			// dom[elemPropKey] = element.props[key];
-		}
-		// Object.defineProperty(dom, key, {
-		// 	value: element.props[key],
-		// 	enumerable: true,
-		// 	writable: false,
-		// });
-	}
-
-	const { children } = element.props;
-	if (!children) return;
-	for (const child of children) {
-		render(child, dom);
-	}
-
-	container.appendChild(dom);
-}
+import { Zeroact } from './lib';
 
 let nextUnitOfWork: any | undefined = undefined;
 
@@ -95,16 +11,13 @@ function workLoop(deadLine: any) {
 	}
 	requestIdleCallback(workLoop);
 }
+// requestIdleCallback is a browser API that calls a function when the browser is idle.
+// currently not used anymore. It uses scheduler package.
 requestIdleCallback(workLoop);
 
 function performUnitOfWork(nextUnitOfWork: any) {
 	// TODO
 }
-
-const Zeroact = {
-	createElement,
-	render,
-};
 
 /** @jsx Zeroact.createElement */
 const element = (
