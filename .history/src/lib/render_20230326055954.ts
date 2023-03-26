@@ -8,7 +8,8 @@ import { TEXT_ELEMENT } from './createTextElement';
 
 let nextUnitOfWork: any = null;
 let wipRoot: any = null;
-let currentRoot: any = null;
+let currentRoot:any = null;
+
 
 export function render(element: IElement, container: HTMLElement) {
 	wipRoot = {
@@ -16,7 +17,7 @@ export function render(element: IElement, container: HTMLElement) {
 		props: {
 			children: [element],
 		},
-		alternate: currentRoot,
+		alternate: currentRoot;
 	};
 
 	nextUnitOfWork = wipRoot;
