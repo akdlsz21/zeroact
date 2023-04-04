@@ -7,9 +7,8 @@ let nextUnitOfWork: any | undefined = undefined;
 const element = (
 	<div style={{ marginLeft: '100px' }}>
 		{/*BUG: currently, not all props are getting added to the dom. */}
-		<button id="foo" onClick={() => console.log('what')}>
-			what
-			<a>bar</a>
+		<button id="foo" onClick={() => alert('what')}>
+			whats up
 			<b />
 		</button>
 		<div>
