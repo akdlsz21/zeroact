@@ -12,7 +12,6 @@ let currentRoot: any = null;
 let deletions: any = null;
 
 export function render(element: IElement, container: HTMLElement) {
-	console.log('🚀 ~ file: render.ts:15 ~ render ~ element:', element);
 	wipRoot = {
 		dom: container,
 		props: {
@@ -22,6 +21,7 @@ export function render(element: IElement, container: HTMLElement) {
 		// It is used to determine which fibers need to be updated.
 		alternate: currentRoot,
 	};
+
 	deletions = [];
 	nextUnitOfWork = wipRoot;
 }
@@ -83,15 +83,10 @@ function updateDom(dom: HTMLElement | any, prevProps: IProp, nextProps: IProp) {
 
 function commitWork(fiber: any) {
 	if (!fiber) return;
-
-	let domParentFiber = fiber.parent;
-	while (!domParentFiber.dom) {
-		domParentFiber = domParentFiber.parent;
-	}
-	const domParent = domParentFiber.dom;
+	const domParent = fiber.parent.dom;
+	domParent.appendChild(fiber.dom);
 	commitWork(fiber.child);
 	commitWork(fiber.sibling);
-
 	if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
 		console.log('asd');
 		domParent.appendChild(fiber.dom);
@@ -102,15 +97,7 @@ function commitWork(fiber: any) {
 	} else if (fiber.effectTag === 'DELETION') {
 		console.log('asd');
 
-		commitDeletion(fiber, domParent);
-	}
-}
-
-function commitDeletion(fiber: any, domParent: any) {
-	if (fiber.dom) {
 		domParent.removeChild(fiber.dom);
-	} else {
-		commitDeletion(fiber.child, domParent);
 	}
 }
 
@@ -130,14 +117,36 @@ export function workLoop(deadLine: any) {
 function performUnitOfWork(fiber: IProp) {
 	const isFunctionComponent = fiber.type instanceof Function;
 
-	if (isFunctionComponent) {
-		updateFunctionComponent(fiber);
-	} else {
-		updateHostComponent(fiber);
+	if (!fiber.dom) {
+		fiber.dom = createDom(fiber);
 	}
+
+	const elements = fiber.props.children;
+	let index = 0;
+	let prevSibling: any = null;
+
+	for (let i = 0; i < elements.length; i++) {
+		const element = elements[i];
+		const newFiber = {
+			type: element.type,
+			props: element.props,
+			parent: fiber,
+			dom: null,
+		};
+
+		if (i === 0) {
+			fiber.child = newFiber;
+		} else {
+			prevSibling.sibling = newFiber;
+		}
+
+		prevSibling = newFiber;
+	}
+
 	if (fiber.child) {
 		return fiber.child;
 	}
+
 	let nextFiber = fiber;
 	while (nextFiber) {
 		if (nextFiber.sibling) {
@@ -145,47 +154,13 @@ function performUnitOfWork(fiber: IProp) {
 		}
 		nextFiber = nextFiber.parent;
 	}
-	// reconcileChildren(fiber, fiber.props.children);
-	// const elements = fiber.props.children;
-	// let index = 0;
-	// let prevSibling: any = null;
-
-	// for (let i = 0; i < elements.length; i++) {
-	// 	const element = elements[i];
-	// 	const newFiber = {
-	// 		type: element.type,
-	// 		props: element.props,
-	// 		parent: fiber,
-	// 		dom: null,
-	// 	};
-
-	// 	if (i === 0) {
-	// 		fiber.child = newFiber;
-	// 	} else {
-	// 		prevSibling.sibling = newFiber;
-	// 	}
-
-	// 	prevSibling = newFiber;
-	// }
-
-	// if (fiber.child) {
-	// 	return fiber.child;
-	// }
-
-	// let nextFiber = fiber;
-	// while (nextFiber) {
-	// 	if (nextFiber.sibling) {
-	// 		return nextFiber.sibling;
-	// 	}
-	// 	nextFiber = nextFiber.parent;
-	// }
-	// console.log(nextFiber);
+	console.log(nextFiber);
 }
 
 function reconcileChildren(wipFiber: any, elements: any) {
 	let index = 0;
 	let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
-	let prevSibling: any = null;
+	let prevSibling = null;
 
 	while (index < elements.length || oldFiber != null) {
 		const element = elements[index];
@@ -234,57 +209,6 @@ function reconcileChildren(wipFiber: any, elements: any) {
 		prevSibling = newFiber;
 		index++;
 	}
-}
-let wipFiber: any = {
-	alternate: null,
-	hooks: [],
-};
-let hookIndex: any = null;
-
-export function useState(initial: any) {
-	const oldHook =
-		wipFiber.alternate &&
-		wipFiber.alternate.hooks &&
-		wipFiber.alternate.hooks[hookIndex];
-	const hook = {
-		state: oldHook ? oldHook.state : initial,
-		queue: [] as any[],
-	};
-
-	const actions = oldHook ? oldHook.queue : [];
-	actions.forEach((action: any) => {
-		hook.state = action(hook.state);
-	});
-
-	const setState = (action: any) => {
-		hook.queue.push(action);
-		wipRoot = {
-			dom: currentRoot.dom,
-			props: currentRoot.props,
-			alternate: currentRoot,
-		};
-		nextUnitOfWork = wipRoot;
-		deletions = [];
-	};
-
-	wipFiber.hooks.push(hook);
-	hookIndex++;
-	return [hook.state, setState];
-}
-
-function updateFunctionComponent(fiber: any) {
-	wipFiber = fiber;
-	hookIndex = 0;
-	wipFiber.hooks = [];
-	const children = [fiber.type(fiber.props)];
-	reconcileChildren(fiber, children);
-}
-
-function updateHostComponent(fiber: any) {
-	if (!fiber.dom) {
-		fiber.dom = createDom(fiber);
-	}
-	reconcileChildren(fiber, fiber.props.children);
 }
 
 // requestIdleCallback is a browser API that calls a function when the browser is idle.

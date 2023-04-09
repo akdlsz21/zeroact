@@ -1,21 +1,19 @@
 import React from 'react';
 import { Zeroact } from './lib';
 
-let nextUnitOfWork: any | undefined = undefined;
-
 /** @jsx Zeroact.createElement */
-const element = (
-	<div style={{ marginLeft: '100px' }}>
-		{/*BUG: currently, not all props are getting added to the dom. */}
-		<button id="foo" onClick={() => alert('what')}>
-			whats up
-			<b />
-		</button>
-		<div>
-			<h1>hello</h1>
-		</div>
-	</div>
-);
-
+function Counter(props: any) {
+	const [state, setState] = Zeroact.useState(1);
+	return (
+		<h1
+			// onClick={() => setState((c: number) => c + 1)}
+			onClick={() => alert('a')}
+			// style="user-select: none"
+		>
+			Count: {state} {props.name}
+		</h1>
+	);
+}
+const element = <Counter name={'jihoon'} />;
 const container = document.getElementById('root');
 if (container) Zeroact.render(element, container);
