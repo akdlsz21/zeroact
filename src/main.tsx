@@ -6,11 +6,12 @@ function Counter(props: any) {
 	const [state, setState] = Zeroact.useState(1);
 	return (
 		<h1
-			// onClick={() => setState((c: number) => c + 1)}
-			onClick={() => alert('a')}
+			// DetailedHTMLProps<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>'
+			onclick={() => setState((c: number) => c + 1)}
+			// onclick={() => alert('a')}
 			// style="user-select: none"
 		>
-			Count: {state} {props.name}
+			Count: {state}
 		</h1>
 	);
 }

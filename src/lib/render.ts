@@ -44,6 +44,7 @@ const isEvent = (key: string) => key.startsWith('on');
 
 function updateDom(dom: HTMLElement | any, prevProps: IProp, nextProps: IProp) {
 	// old or chagned event listeners should be removed.
+	console.log('a');
 	Object.keys(prevProps)
 		.filter(isEvent)
 		.filter(
@@ -69,14 +70,18 @@ function updateDom(dom: HTMLElement | any, prevProps: IProp, nextProps: IProp) {
 		.forEach((name) => {
 			dom[name] = nextProps[name];
 		});
-
+	console.log('a');
 	// add event listeners
 	Object.keys(nextProps)
-		.filter(isEvent)
+		.filter((key) => isEvent(key))
 		.filter(isNew(prevProps, nextProps))
 		.forEach((name: string) => {
 			console.log(name);
 			const eventType = name.toLowerCase().substring(2);
+			console.log(
+				'🚀 ~ file: render.ts:80 ~ .forEach ~ eventType:',
+				eventType
+			);
 			dom.addEventListener(eventType, nextProps[name]);
 		});
 }
@@ -92,16 +97,11 @@ function commitWork(fiber: any) {
 	commitWork(fiber.child);
 	commitWork(fiber.sibling);
 
-	if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
-		console.log('asd');
+	if (fiber.effectTag === 'PLACEMENT' && fiber.dom) {
 		domParent.appendChild(fiber.dom);
-	} else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
-		console.log('asd');
-
+	} else if (fiber.effectTag === 'UPDATE' && fiber.dom) {
 		updateDom(fiber.dom, fiber.alternate.props, fiber.props);
 	} else if (fiber.effectTag === 'DELETION') {
-		console.log('asd');
-
 		commitDeletion(fiber, domParent);
 	}
 }
@@ -129,7 +129,6 @@ export function workLoop(deadLine: any) {
 
 function performUnitOfWork(fiber: IProp) {
 	const isFunctionComponent = fiber.type instanceof Function;
-
 	if (isFunctionComponent) {
 		updateFunctionComponent(fiber);
 	} else {
@@ -145,44 +144,11 @@ function performUnitOfWork(fiber: IProp) {
 		}
 		nextFiber = nextFiber.parent;
 	}
-	// reconcileChildren(fiber, fiber.props.children);
-	// const elements = fiber.props.children;
-	// let index = 0;
-	// let prevSibling: any = null;
-
-	// for (let i = 0; i < elements.length; i++) {
-	// 	const element = elements[i];
-	// 	const newFiber = {
-	// 		type: element.type,
-	// 		props: element.props,
-	// 		parent: fiber,
-	// 		dom: null,
-	// 	};
-
-	// 	if (i === 0) {
-	// 		fiber.child = newFiber;
-	// 	} else {
-	// 		prevSibling.sibling = newFiber;
-	// 	}
-
-	// 	prevSibling = newFiber;
-	// }
-
-	// if (fiber.child) {
-	// 	return fiber.child;
-	// }
-
-	// let nextFiber = fiber;
-	// while (nextFiber) {
-	// 	if (nextFiber.sibling) {
-	// 		return nextFiber.sibling;
-	// 	}
-	// 	nextFiber = nextFiber.parent;
-	// }
-	// console.log(nextFiber);
 }
 
 function reconcileChildren(wipFiber: any, elements: any) {
+	console.log(elements);
+	elements;
 	let index = 0;
 	let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
 	let prevSibling: any = null;
@@ -281,6 +247,7 @@ function updateFunctionComponent(fiber: any) {
 }
 
 function updateHostComponent(fiber: any) {
+	console.log(fiber);
 	if (!fiber.dom) {
 		fiber.dom = createDom(fiber);
 	}
@@ -290,42 +257,3 @@ function updateHostComponent(fiber: any) {
 // requestIdleCallback is a browser API that calls a function when the browser is idle.
 // currently not used anymore. It uses scheduler package.
 requestIdleCallback(workLoop);
-
-/*
-export function render(element: IElement, container: HTMLElement | Text) {
-	if (!container) alert('container is not defined');
-	if (!element) alert('element is not defined');
-
-	let dom =
-		element.type === TEXT_ELEMENT
-			? document.createTextNode('')
-			: document.createElement(element.type);
-
-	for (const key in element.props) {
-		if (key === 'children') continue;
-		if (key === 'nodeValue' && dom.nodeValue === '') {
-			// Static method Object.defineProperty does sets a new property to the dom,
-			// but when appendChild to the container, it does not get reflected. Do not know why.
-			dom.nodeValue = element.props[key];
-			continue;
-		}
-		if (dom instanceof HTMLElement) {
-			const elemPropKey = key as NonHTMLReadOnlyPropertyKeys;
-			// dom[elemPropKey] = element.props[key];
-		}
-		// Object.defineProperty(dom, key, {
-		// 	value: element.props[key],
-		// 	enumerable: true,
-		// 	writable: false,
-		// });
-	}
-
-	const { children } = element.props;
-	if (!children) return;
-	for (const child of children) {
-		render(child, dom);
-	}
-
-	container.appendChild(dom);
-}
-*/
