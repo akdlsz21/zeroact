@@ -49,5 +49,10 @@ The updateFunctionComponent function calls the function component with its props
 and returns the next fiber to be processed, starting with the first child.
 
 # Example
+![image](https://user-images.githubusercontent.com/81629070/230907400-b3f4f9d3-b9cc-44ee-967a-beb3772e88c6.png)
 
-An example usage of the Zeroact library is provided at the end of the file.
+
+
+https://user-images.githubusercontent.com/81629070/230907879-d9408dfb-f4e7-428a-872a-2307c3932e1a.mp4
+
+
